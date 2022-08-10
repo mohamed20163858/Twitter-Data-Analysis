@@ -1,3 +1,6 @@
+import json
+import pandas as pd
+from textblob import TextBlob
 class Clean_Tweets:
     """
     The PEP8 Standard AMAZING!!!
@@ -27,8 +30,11 @@ class Clean_Tweets:
         df = df[df['created_at'] >= '2020-12-31' ]
         for i in range(len(df['created_at'])):
             from datetime import datetime
-            datetime_object =datetime.strptime(df['created_at'][i], '%a %b %d %H:%M:%S +%f %Y')
-            df['created_at'][i]=str(datetime_object) 
+            try:
+                datetime_object =datetime.strptime(df['created_at'][i], '%a %b %d %H:%M:%S +%f %Y')
+                df['created_at'][i]=str(datetime_object) 
+            except KeyError:
+                df['created_at'][i]=''
         return df
     
     def convert_to_numbers(self, df:pd.DataFrame)->pd.DataFrame:
@@ -46,6 +52,18 @@ class Clean_Tweets:
         """
         remove non english tweets from lang
         """
-        
-        df = df.drop(df[df.lang != 'en'].index,inplace=True)
+        df.drop(df[df['lang'] != 'en'].index,inplace=True)
         return df
+    def get_clean_tweet_df(self, save=False)->pd.DataFrame:
+        clean_tweet_df = self.drop_unwanted_column(self.df)
+        clean_tweet_df = self.convert_to_datetime(clean_tweet_df)
+        clean_tweet_df = self.drop_duplicate(clean_tweet_df)
+        clean_tweet_df = self.convert_to_numbers(clean_tweet_df)
+        clean_tweet_df = self.remove_non_english_tweets(clean_tweet_df)
+        if save:
+            clean_tweet_df.to_csv('processed_clean_tweet_data.csv', index=False)
+            print('File Successfully Saved.!!!')
+        return clean_tweet_df
+
+
+

@@ -1,7 +1,7 @@
 import json
 import pandas as pd
 from textblob import TextBlob
-
+from clean_tweets_dataframe import Clean_Tweets
 
 def read_json(json_file: str)->list:
     """
@@ -141,5 +141,6 @@ if __name__ == "__main__":
     _, tweet_list = read_json("data\global_twitter_data\global_twitter_data.json")
     tweet = TweetDfExtractor(tweet_list)
     tweet_df = tweet.get_tweet_df(True) 
-
+    clean_tweet = Clean_Tweets(tweet_df)
+    clean_tweet_df = clean_tweet.get_clean_tweet_df(True)
     # use all defined functions to generate a dataframe with the specified columns above
