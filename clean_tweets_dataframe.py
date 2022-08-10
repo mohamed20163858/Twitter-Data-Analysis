@@ -54,12 +54,54 @@ class Clean_Tweets:
         """
         df.drop(df[df['lang'] != 'en'].index,inplace=True)
         return df
+    def clean_hashtags(self, df:pd.DataFrame)->pd.DataFrame:
+        t=[]
+        k=[]
+        mystr=''
+        for i in range(len(df['hashtags'])):
+            try:
+                t.append(df['hashtags'][i].replace('\'','"').replace('},','},,').split(',,'))
+                if len(t[i][0])>0:
+                    for js in t[i] :
+                        mystr=mystr+json.loads(js)['text']+ ', '
+                    mystr=mystr[0:-2]
+                    k.append(mystr)
+                    mystr='' 
+                else:
+                    k.append('')    
+            except:
+                t.append(['error'])
+                k.append('')
+        df['hashtags'] = k
+        return df
+    def clean_user_mentions(self, df:pd.DataFrame)->pd.DataFrame:
+        t=[]
+        k=[]
+        mystr=''
+        for i in range(len(df['user_mentions'])):
+            try:
+                t.append(df['user_mentions'][i].replace('\'','"').replace('},','},,').split(',,'))
+                if len(t[i][0])>0:
+                    for js in t[i] :
+                        mystr=mystr+json.loads(js)['screen_name']+ ', '
+                    mystr=mystr[0:-2]
+                    k.append(mystr)
+                    mystr='' 
+                else:
+                    k.append('')    
+            except:
+                t.append(['error'])
+                k.append('')
+        df['user_mentions'] = k
+        return df
     def get_clean_tweet_df(self, save=False)->pd.DataFrame:
         clean_tweet_df = self.drop_unwanted_column(self.df)
         clean_tweet_df = self.convert_to_datetime(clean_tweet_df)
         clean_tweet_df = self.drop_duplicate(clean_tweet_df)
         clean_tweet_df = self.convert_to_numbers(clean_tweet_df)
         clean_tweet_df = self.remove_non_english_tweets(clean_tweet_df)
+        clean_tweet_df = self.clean_hashtags(clean_tweet_df)
+        clean_tweet_df = self.clean_user_mentions(clean_tweet_df)
         if save:
             clean_tweet_df.to_csv('processed_clean_tweet_data.csv', index=False)
             print('File Successfully Saved.!!!')
